@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What's Jesse's Bench?</title>
+<meta name="description" content="Live tracker of Jesse's bench press.">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏋️</text></svg>">
+<style>
+  :root {
+    --bg: #f7f5f2;
+    --fg: #1a1a1a;
+    --muted: #8a8578;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #121110;
+      --fg: #f0ede8;
+      --muted: #7a766c;
+    }
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    background: var(--bg);
+    color: var(--fg);
+    font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", Helvetica, Arial, sans-serif;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 1rem;
+    text-align: center;
+    padding: 2rem;
+  }
+  h1 {
+    font-size: clamp(1rem, 3vw, 1.5rem);
+    font-weight: 600;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+  .number {
+    font-size: clamp(10rem, 45vw, 32rem);
+    font-weight: 800;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+  .unit {
+    font-size: clamp(1.25rem, 4vw, 2rem);
+    font-weight: 600;
+    color: var(--muted);
+  }
+  footer {
+    position: fixed;
+    bottom: 1.5rem;
+    font-size: 0.85rem;
+    color: var(--muted);
+  }
+</style>
+</head>
+<body>
+  <h1>What's Jesse's Bench?</h1>
+  <div class="number">0</div>
+  <div class="unit">lbs</div>
+  <footer>Torn bicep. Heal up, champ. 💪🩹</footer>
+</body>
+</html>
