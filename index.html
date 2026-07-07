@@ -158,6 +158,7 @@
     will-change: transform;
     user-select: none;
     cursor: pointer;
+    touch-action: manipulation;
     -webkit-tap-highlight-color: transparent;
   }
 
@@ -216,6 +217,103 @@
     100% { transform: scale(1) rotate(0deg); }
   }
 
+  /* ————— The letter (double-tap the 0) ————— */
+  .letter-open .stage {
+    opacity: 0;
+    transform: scale(0.92);
+    transition: opacity 0.5s ease, transform 0.5s var(--ease-out-soft);
+    pointer-events: none;
+  }
+  .stage {
+    transition: opacity 0.5s ease 0.15s, transform 0.5s var(--ease-out-soft) 0.15s;
+  }
+
+  .letter {
+    position: fixed;
+    inset: 0;
+    z-index: 2;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: clamp(1rem, 4vw, 2.5rem);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.5s ease;
+  }
+  .letter-open .letter {
+    opacity: 1;
+    pointer-events: auto;
+    transition: opacity 0.6s ease 0.2s;
+  }
+
+  .letter-card {
+    position: relative;
+    max-width: 38rem;
+    max-height: min(84vh, 84dvh);
+    overflow-y: auto;
+    text-align: left;
+    background: rgba(254, 249, 237, 0.94);
+    border: 1px solid rgba(28, 31, 88, 0.08);
+    border-radius: 24px;
+    padding: clamp(1.75rem, 5vw, 3rem);
+    box-shadow: 0 24px 80px rgba(28, 31, 88, 0.18);
+    transform: translateY(28px);
+    transition: transform 0.5s var(--ease-out-soft);
+  }
+  .letter-open .letter-card {
+    transform: translateY(0);
+    transition: transform 0.7s var(--ease-out-soft) 0.2s;
+  }
+  @media (prefers-color-scheme: dark) {
+    .letter-card {
+      background: rgba(27, 29, 72, 0.96);
+      border-color: rgba(163, 172, 255, 0.15);
+      box-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+    }
+  }
+
+  .letter-card h2 {
+    font-size: clamp(1.4rem, 4vw, 1.9rem);
+    font-weight: 800;
+    letter-spacing: -0.01em;
+    color: var(--blurple);
+    margin-bottom: 1.25rem;
+  }
+  @media (prefers-color-scheme: dark) {
+    .letter-card h2 { color: var(--blurple-300); }
+  }
+  .letter-card p {
+    font-size: clamp(0.98rem, 2.5vw, 1.08rem);
+    line-height: 1.65;
+    margin-bottom: 1rem;
+  }
+  .letter-card .sign-off {
+    margin-top: 1.5rem;
+    margin-bottom: 0;
+    font-weight: 700;
+  }
+
+  .letter-close {
+    position: absolute;
+    top: 1rem;
+    right: 1rem;
+    width: 2.25rem;
+    height: 2.25rem;
+    border: none;
+    border-radius: 50%;
+    background: rgba(28, 31, 88, 0.07);
+    color: var(--muted);
+    font-size: 1.1rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: background 0.2s ease, transform 0.2s ease;
+  }
+  .letter-close:hover { background: rgba(28, 31, 88, 0.13); transform: scale(1.08); }
+  @media (prefers-color-scheme: dark) {
+    .letter-close { background: rgba(163, 172, 255, 0.12); }
+    .letter-close:hover { background: rgba(163, 172, 255, 0.2); }
+  }
+
   @media (prefers-reduced-motion: reduce) {
     *, *::before, *::after {
       animation-duration: 0.01ms !important;
@@ -240,6 +338,17 @@
       </div>
     </div>
   </main>
+
+  <div class="letter" id="letter" role="dialog" aria-modal="true" aria-label="A note for Jesse" hidden>
+    <div class="letter-card">
+      <button class="letter-close" id="letterClose" aria-label="Close">✕</button>
+      <h2>Thank you, Jesse</h2>
+      <p>It was just gonna be a joke about your bicep, but it feels mean to leave it at that.</p>
+      <p>You've written a book, but you've also written the DNA of YNAB.</p>
+      <p>Thanks for writing it the way you did.</p>
+      <p>I hope you heal quickly. Hang in there.</p>
+    </div>
+  </div>
 
 <script>
 (function () {
@@ -315,12 +424,44 @@
     }, { passive: true });
   }
 
-  /* click the 0 and it winces */
+  /* single click: wince. double-click: the letter. */
+  const letterEl = document.getElementById("letter");
+  const letterClose = document.getElementById("letterClose");
+  const DOUBLE_CLICK_WINDOW = 350;
+  let lastClick = 0;
+
+  function openLetter() {
+    letterEl.hidden = false;
+    void letterEl.offsetWidth; /* let the transition see the un-hidden state */
+    document.body.classList.add("letter-open");
+    letterClose.focus();
+  }
+
+  function closeLetter() {
+    document.body.classList.remove("letter-open");
+    setTimeout(function () { letterEl.hidden = true; }, 600);
+  }
+
   numberEl.addEventListener("click", function () {
     if (!document.body.classList.contains("settled")) return;
+    const now = performance.now();
+    if (now - lastClick < DOUBLE_CLICK_WINDOW) {
+      lastClick = 0;
+      openLetter();
+      return;
+    }
+    lastClick = now;
     stageEl.classList.remove("wince");
     void stageEl.offsetWidth; /* restart the animation */
     stageEl.classList.add("wince");
+  });
+
+  letterClose.addEventListener("click", closeLetter);
+  letterEl.addEventListener("click", function (e) {
+    if (e.target === letterEl) closeLetter();
+  });
+  window.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && document.body.classList.contains("letter-open")) closeLetter();
   });
 })();
 </script>
